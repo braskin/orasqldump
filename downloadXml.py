@@ -7,7 +7,6 @@ from downloadCommon import getSeqName
 from xml.dom.minidom import parse, parseString
 from OracleInterface import OracleDownloader
 from ddlInterface import createDdlInterface, attribsToDict
-from NamingConvention import *
 
 
 __author__ = "Scott Kirkwood (scott_kirkwood at berlios.com)"

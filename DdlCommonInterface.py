@@ -1,9 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 import re, os
-from NamingConvention import *
-
-import inspect
 
 class DdlCommonInterface:
     """ Class which has the common interfaces for creating DDL.  
