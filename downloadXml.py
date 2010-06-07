@@ -52,31 +52,18 @@ class DownloadXml:
 
             for colRow in self.db.getTableColumns(strTableName):
                 (strColumnName, type, attlen, precision, attnotnull, default, bAutoIncrement) = colRow
+                strComment = self.db.getColumnComment(strTableName, strColumnName)
                 curCol = {
                     'name' : str(strColumnName),
                     'type' : str(type),
+                    'size' : attlen,
+                    'precision' : precision if precision else '',
+                    'default' : default if default else '',
+                    'desc' : escape(strComment) if strComment else '',
+                    'null' : 'no' if attnotnull else '',
+                    'key' : pkMap[strColumnName] if strColumnName in pkMap else '',
+                    'autoincrement' : 'yes' if bAutoIncrement else '',
                 }   
-                if attlen:
-                    curCol['size'] = attlen
-                
-                if precision:
-                    curCol['precision'] = precision
-                
-                if attnotnull:
-                    curCol['null'] = 'no'
-                
-                if strColumnName in pkMap:
-                    curCol['key'] = pkMap[strColumnName]
-                
-                if default:
-                    curCol['default'] = default
-                
-                strComment = self.db.getColumnComment(strTableName, strColumnName)
-                if strComment:
-                    curCol['desc'] = escape(strComment)
-                
-                if bAutoIncrement:
-                    curCol['autoincrement'] = "yes"
                 
                 curTable['columns'].append(curCol)
 
@@ -103,14 +90,6 @@ class DownloadXml:
         for result in results:
           print "%s;" % (result[1])
 
-    def doAttribs(self, attribs, nameList):
-        ret = []
-        for name in nameList:
-            if name in attribs:
-                ret.append('%s="%s"' % (name, attribs[name]))
-        
-        return ' '.join(ret)
-    
 def createDownloader(conn = None, info = None, options = None):
     db = OracleDownloader()
 
