@@ -52,18 +52,19 @@ class DownloadXml:
             for colRow in self.db.getTableColumns(strTableName):
                 (strColumnName, type, attlen, precision, attnotnull, default, bAutoIncrement) = colRow
                 strComment = self.db.getColumnComment(strTableName, strColumnName)
-                curCol = {
-                    'name' : str(strColumnName),
-                    'type' : str(type),
-                    'size' : attlen,
-                    'precision' : precision if precision else '',
-                    'default' : default if default else '',
-                    'desc' : escape(strComment) if strComment else '',
-                    'null' : 'no' if attnotnull else '',
-                    'key' : pkMap[strColumnName] if strColumnName in pkMap else '',
-                    'autoincrement' : 'yes' if bAutoIncrement else '',
-                }   
-                
+                curCol = dict( 
+                  [
+                    ('name', str(strColumnName)),
+                    ('type', str(type)),
+                    ('size', attlen) if attlen else ('',''),
+                    ('precision', precision) if precision else ('',''),
+                    ('default', default) if default else ('',''),
+                    ('desc', escape(strComment)) if strComment else ('',''),
+                    ('null', 'no') if attnotnull else ('',''),
+                    ('key', pkMap[strColumnName]) if strColumnName in pkMap else ('',''),
+                    ('autoincrement', 'yes') if bAutoIncrement else ('','')
+                  ] );
+                  
                 curTable['columns'].append(curCol)
 
             self.dumpTable(curTable, of)
@@ -77,7 +78,7 @@ class DownloadXml:
             keys.append(col['name'])
 
         results = []
-        self.ddlInterface.addTable(info['name'],colDefs,keys,[],results)
+        self.ddlInterface.addTable(info['name'],colDefs,keys,'',results)
 
         for index in info['indexes']:
           if not index[3]:
