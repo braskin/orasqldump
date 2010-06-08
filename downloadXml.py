@@ -68,7 +68,28 @@ class DownloadXml:
                 curTable['columns'].append(curCol)
 
             self.dumpTable(curTable, of)
-            
+
+        if self.options == None or 'getviews' not in self.options or self.options['getviews'] == True:
+            self.getViews(of)
+
+
+    def getViews(self, of):
+        views = self.db.getViews(self.options['views'])
+        for viewName in views:
+            definition = self.db.getViewDefinition(viewName)
+            info = {
+                'name' : viewName,
+                'definition' : definition,
+            }
+            self.dumpView(info, of)
+    
+    def dumpView(self, info, of):
+        results = []
+        self.ddlInterface.addView(info['name'],info['definition'],{},results)
+
+        for result in results:
+          print "%s;" % (result[1])
+
     def dumpTable(self, info, of):
         colDefs = []
         keys = []
@@ -123,6 +144,9 @@ def parseCommandLine():
         dest="strTables", metavar="TABLES", default=None,
         help="Comma separated list of tables")
 
+    parser.add_option("-v", "--views",
+        dest="strViews", metavar="VIEWS", default=None,
+        help="Comma separated list of views")
     (options, args) = parser.parse_args()
     
     info = {
@@ -138,10 +162,17 @@ def parseCommandLine():
     else:
         tables = None
         
+    if options.strViews:
+        views = options.strViews.split(',')
+    else:
+        views = None
+
     runOptions = {
         'getrelations' : True,
+        'getviews'     : False if ((tables and len(tables) > 0) and not views) else True,
         'getindexes'   : True,
         'tables'       : tables,
+        'views'        : views,
     }
     if info['dbname'] == None or info['user'] == None:
         parser.print_help()
