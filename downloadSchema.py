@@ -15,16 +15,21 @@ __licence__ = "GNU Public License (GPL)"
 __url__ = 'http://xml2dml.berlios.de'
 
 
-class DownloadXml:
+class DownloadSchema:
     def __init__(self, downloader, options):
         self.db = downloader
         self.options = options
         dbms='oracle'
         self.ddlInterface = createDdlInterface(dbms)
-        if 'tables' not in self.options:
-            self.options['tables'] = []
         
-    def downloadSchema(self, tableList = None, of = sys.stdout):
+    def downloadSchema(self, of = sys.stdout):
+        if self.options['getall'] == True or (self.options['views'] and (len(self.options['views']) > 0)):
+            self.getViews(of)
+
+        if self.options['getall'] == True or (self.options['tables'] and (len(self.options['tables']) > 0)):
+            self.getTables(of)
+
+    def getTables(self, of):
         tables = self.db.getTables(tableList = self.options['tables'])
 
         for strTableName in tables:
@@ -68,10 +73,6 @@ class DownloadXml:
                 curTable['columns'].append(curCol)
 
             self.dumpTable(curTable, of)
-
-        if self.options == None or 'getviews' not in self.options or self.options['getviews'] == True:
-            self.getViews(of)
-
 
     def getViews(self, of):
         views = self.db.getViews(self.options['views'])
@@ -122,7 +123,7 @@ def createDownloader(conn = None, info = None, options = None):
         info = conn_info[dbms]
         db.connect(info)
         
-    return DownloadXml(db, options)
+    return DownloadSchema(db, options)
 
 def parseCommandLine():
     import optparse
@@ -139,6 +140,10 @@ def parseCommandLine():
     parser.add_option("-p", "--pass",
         dest="strPassword", metavar="PASS", 
         help="Password for the user")
+
+    parser.add_option("-a", "--getall",
+        action="store_true", dest="bGetAll", default=False,
+        help="Download all tables and views for database")
 
     parser.add_option("-t", "--tables",
         dest="strTables", metavar="TABLES", default=None,
@@ -168,8 +173,10 @@ def parseCommandLine():
         views = None
 
     runOptions = {
+        'getall'       : options.bGetAll,
+        'gettables'    : True if ((tables and len(tables) > 0)) else False,
+        'getviews'     : True if ((views and len(views) > 0)) else False,
         'getrelations' : True,
-        'getviews'     : False if ((tables and len(tables) > 0) and not views) else True,
         'getindexes'   : True,
         'tables'       : tables,
         'views'        : views,
