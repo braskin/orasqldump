@@ -2,6 +2,7 @@
 # -*- coding: iso-8859-1 -*-
 from downloadCommon import DownloadCommon, getSeqName
 from DdlCommonInterface import DdlCommonInterface
+from DmlCommonInterface import DmlCommonInterface
 import re
 
 class FbDownloader(DownloadCommon):
@@ -310,8 +311,8 @@ class FbDownloader(DownloadCommon):
 
 
 class DdlFirebird(DdlCommonInterface):
-    def __init__(self):
-        DdlCommonInterface.__init__(self, 'firebird')
+    def __init__(self, strDbms):
+        DdlCommonInterface.__init__(self, strDbms)
         self.params['max_id_len'] = { 'default' : 256 }
         self.params['table_desc'] = ["UPDATE RDB$RELATIONS SET RDB$DESCRIPTION = %(desc)s\n\tWHERE RDB$RELATION_NAME = upper('%(table)s')"]
         self.params['column_desc'] = ["UPDATE RDB$RELATION_FIELDS SET RDB$DESCRIPTION = %(desc)s\n\tWHERE RDB$RELATION_NAME = upper('%(table)s') AND RDB$FIELD_NAME = upper('%(column)s')"]
@@ -369,3 +370,7 @@ class DdlFirebird(DdlCommonInterface):
         diffs.append(('Drop function',
             'DROP PROCEDURE %(functionname)s' % info )
         )
+
+class DmlFirebird(DmlCommonInterface):
+    def __init__(self, strDbms):
+        DmlCommonInterface.__init__(self, strDbms)

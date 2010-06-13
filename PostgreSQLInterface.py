@@ -3,6 +3,7 @@
 
 from downloadCommon import DownloadCommon, getSeqName
 from DdlCommonInterface import DdlCommonInterface
+from DmlCommonInterface import DmlCommonInterface
 import re
 
 class PgDownloader(DownloadCommon):
@@ -462,3 +463,7 @@ class DdlPostgres(DdlCommonInterface):
         diffs.append(('Add view',  # OR REPLACE 
             "CREATE FUNCTION %(functionname)s(%(arguments)s) RETURNS %(returns)s AS '\n%(contents)s'%(language)s" % info )
         )
+
+class DmlPostgres(DmlCommonInterface):
+    def __init__(self, strDbms):
+        DmlCommonInterface.__init__(self, strDbms)

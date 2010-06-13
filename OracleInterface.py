@@ -3,6 +3,7 @@
 
 from downloadCommon import DownloadCommon, getSeqName
 from DdlCommonInterface import DdlCommonInterface
+from DmlCommonInterface import DmlCommonInterface
 import re
 
 class OracleDownloader(DownloadCommon):
@@ -354,6 +355,16 @@ class OracleDownloader(DownloadCommon):
                 strReturn = DATA_TYPE
         return (strSpecifiName.lower(), parameters, strReturn, None, strDefinition)
 
+    def getTableData(self, strTableName, cols):
+        colNames = []
+        for col in cols:
+            colNames.append(col[0])
+
+        strCols = ','.join(colNames)
+        strQuery = "select "+strCols+" from "+strTableName
+        self.cursor.execute(strQuery)
+        return self.cursor.__iter__()
+        
 
 class DdlOracle(DdlCommonInterface):
     def __init__(self, strDbms):
@@ -395,3 +406,81 @@ class DdlOracle(DdlCommonInterface):
         for strDdl in self.params['create_function']:
             diffs.append(('Add function',  strDdl % info))
     
+
+        
+class DmlOracle(DmlCommonInterface):
+    def __init__(self, strDbms):
+        DmlCommonInterface.__init__(self, strDbms)
+
+    def insertData(self, strTableName, cols, table_data_iter):
+        create_iter = insertDataIter(strTableName, cols, table_data_iter)
+        return create_iter
+
+
+class insertDataIter():
+    def __init__(self, strTableName, cols, table_data_iter):
+        self.cols=cols
+        self.table_data_iter=table_data_iter
+        self.table_name=strTableName
+        self.header=False
+        self.footer=False
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if not self.header:
+            header=self.constructHeader()
+            first_record=self.processRecord(self.header)
+            self.header=True
+            return (header+first_record)
+        else:
+            try:
+                next_record=self.processRecord(self.header)
+            except StopIteration:
+                if (self.footer):
+                    raise
+                next_record=';\nCOMMIT;\n'
+                self.footer=True
+            return (next_record)
+            
+    def processRecord(self, needsUnion):
+        record = self.table_data_iter.next()
+        elements = []
+        counter = 0
+        options = { 
+            'NUMBER':self.formatInt, 
+            'VARCHAR2':self.formatString, 
+            'DATE':self.formatDate,
+            'NVARCHAR2':self.formatString,
+            'NCHAR':self.formatString,
+            'VARCHAR':self.formatString,
+        }
+        for col in self.cols:
+            elements.append(options[col[1]](record[counter]))
+            counter+=1
+        if needsUnion:
+            retStr='UNION ALL '
+        else:
+            retStr=''
+        retStr+= 'SELECT ' + ','.join(elements) + ' FROM DUAL'
+        return(retStr)
+
+    def constructHeader(self):
+        col_names = []
+        for col in self.cols:
+            col_names.append(col[0])
+        retStr="insert into "+self.table_name+"\n"
+        retStr+='('+','.join(col_names)+')'+"\n"
+        return(retStr)
+
+    def formatInt(self, iInt):
+        return('\''+str(iInt)+'\'')
+
+    def formatDate(self, dDate):
+        return("to_date('%s','yyyy-mm-dd hh24:mi:ss')" % dDate)
+
+    def formatString(self, strString):
+        return('\''+strString+'\'')
+
+

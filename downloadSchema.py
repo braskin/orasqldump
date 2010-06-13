@@ -7,6 +7,7 @@ from downloadCommon import getSeqName
 from xml.dom.minidom import parse, parseString
 from OracleInterface import OracleDownloader
 from ddlInterface import createDdlInterface, attribsToDict
+from dmlInterface import createDmlInterface
 
 
 __author__ = "Scott Kirkwood (scott_kirkwood at berlios.com)"
@@ -21,6 +22,7 @@ class DownloadSchema:
         self.options = options
         dbms='oracle'
         self.ddlInterface = createDdlInterface(dbms)
+        self.dmlInterface = createDmlInterface(dbms)
         
     def downloadSchema(self, of = sys.stdout):
         if self.options['getall'] == True or (self.options['views'] and (len(self.options['views']) > 0)):
@@ -29,6 +31,18 @@ class DownloadSchema:
         if self.options['getall'] == True or (self.options['tables'] and (len(self.options['tables']) > 0)):
             self.getTables(of)
 
+        if self.options['getall'] == True or (self.options['tables'] and (len(self.options['tables']) > 0)):
+            self.getTableData(of)
+
+
+    def getTableData(self, of):
+        tables = self.db.getTables(tableList = self.options['tables'])
+        for strTableName in tables:
+            cols = self.db.getTableColumns(strTableName)
+            table_data_iter = self.db.getTableData(strTableName,cols)
+            self.dumpTableDML(strTableName, cols, table_data_iter)
+
+            
     def getTables(self, of):
         tables = self.db.getTables(tableList = self.options['tables'])
 
@@ -72,7 +86,7 @@ class DownloadSchema:
                   
                 curTable['columns'].append(curCol)
 
-            self.dumpTable(curTable, of)
+            self.dumpTableDDL(curTable, of)
 
     def getViews(self, of):
         views = self.db.getViews(self.options['views'])
@@ -91,7 +105,7 @@ class DownloadSchema:
         for result in results:
           print "%s;" % (result[1])
 
-    def dumpTable(self, info, of):
+    def dumpTableDDL(self, info, of):
         colDefs = []
         keys = []
         for col in info['columns']:
@@ -111,6 +125,10 @@ class DownloadSchema:
           
         for result in results:
           print "%s;" % (result[1])
+
+    def dumpTableDML(self, strTableName, cols, table_data_iter):
+        for line in self.dmlInterface.insertData(strTableName, cols, table_data_iter):
+            print line
 
 def createDownloader(conn = None, info = None, options = None):
     db = OracleDownloader()

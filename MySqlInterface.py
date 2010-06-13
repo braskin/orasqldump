@@ -2,6 +2,7 @@
 # -*- coding: iso-8859-1 -*-
 from downloadCommon import DownloadCommon, getSeqName
 from DdlCommonInterface import DdlCommonInterface
+from DmlCommonInterface import DmlCommonInterface
 import re
 
 class MySqlDownloader(DownloadCommon):
@@ -261,8 +262,8 @@ class MySqlDownloader(DownloadCommon):
         return (strSpecifiName, strParams, strReturns, strLanguage, strDefinition)
 
 class DdlMySql(DdlCommonInterface):
-    def __init__(self):
-        DdlCommonInterface.__init__(self, 'mysql')
+    def __init__(self, strDbms):
+        DdlCommonInterface.__init__(self, strDbms)
         self.params['max_id_len'] = { 'default' : 64 }
         self.params['quote_l'] = '`'
         self.params['quote_r'] = '`'
@@ -326,3 +327,7 @@ class DdlMySql(DdlCommonInterface):
         diffs.append(('Drop function',
             'DROP FUNCTION %(functionname)s' % info)
         )
+
+class DmlMySql(DmlCommonInterface):
+    def __init__(self, strDbms):
+        DmlCommonInterface.__init__(self, strDbms)
