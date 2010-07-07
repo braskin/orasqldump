@@ -25,14 +25,14 @@ class DownloadSchema:
         self.dmlInterface = createDmlInterface(dbms)
         
     def downloadSchema(self, of = sys.stdout):
-        if self.options['getall'] == True or (self.options['views'] and (len(self.options['views']) > 0)):
-            self.getViews(of)
-
         if self.options['getall'] == True or (self.options['tables'] and (len(self.options['tables']) > 0)):
             self.getTables(of)
 
         if self.options['getall'] == True or (self.options['tables'] and (len(self.options['tables']) > 0)):
             self.getTableData(of)
+
+        if self.options['getall'] == True or (self.options['views'] and (len(self.options['views']) > 0)):
+            self.getViews(of)
 
 
     def getTableData(self, of):

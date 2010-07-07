@@ -9,8 +9,6 @@ from PostgreSQLInterface import DdlPostgres
 from MySqlInterface import DdlMySql
 from FirebirdInterface import DdlFirebird
 
-#print "in ddlinterface.py"
-#exit()
 
 __author__ = "Scott Kirkwood (scott_kirkwood at berlios.com)"
 __keywords__ = ['XML', 'DML', 'SQL', 'Databases', 'Agile DB', 'ALTER', 'CREATE TABLE', 'GPL']

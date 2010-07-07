@@ -41,7 +41,7 @@ class OracleDownloader(DownloadCommon):
             inTables = ""
         strQuery = """SELECT TABLE_NAME FROM ALL_TABLES WHERE 
             TABLE_NAME NOT IN ('DUAL')
-            AND OWNER NOT IN ('SYS', 'SYSTEM', 'OLAPSYS', 'WKSYS', 'WMSYS', 'CTXSYS', 'DMSYS', 'MDSYS', 'EXFSYS', 'ORDSYS')
+            AND OWNER NOT IN ('SYS', 'SYSTEM', 'OLAPSYS', 'WKSYS', 'WMSYS', 'CTXSYS', 'DMSYS', 'MDSYS', 'EXFSYS', 'ORDSYS', 'HR','XDB','FLOWS_FILES','OUTLN','FLOWS_020100','DBSNMP','TSMSYS')
             AND TABLE_NAME NOT LIKE 'BIN$%%' 
             %s
             ORDER BY TABLE_NAME
@@ -259,7 +259,7 @@ class OracleDownloader(DownloadCommon):
         
         strQuery = """SELECT VIEW_NAME 
         FROM ALL_VIEWS
-        WHERE OWNER NOT IN ('SYS', 'SYSTEM', 'OLAPSYS', 'WKSYS', 'WMSYS', 'CTXSYS', 'DMSYS', 'MDSYS', 'EXFSYS', 'ORDSYS', 'WK_TEST', 'XDB')
+        WHERE OWNER NOT IN ('SYS', 'SYSTEM', 'OLAPSYS', 'WKSYS', 'WMSYS', 'CTXSYS', 'DMSYS', 'MDSYS', 'EXFSYS', 'ORDSYS', 'HR','XDB','FLOWS_FILES','OUTLN','FLOWS_020100','DBSNMP','TSMSYS')
         %s
         ORDER BY VIEW_NAME""" % (inViews)
               
