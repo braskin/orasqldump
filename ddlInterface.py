@@ -34,9 +34,9 @@ def createDdlInterface(strDbms):
     if strDbms.startswith('postgres'):
         return DdlPostgres(strDbms)
     elif strDbms.startswith('mysql'):
-        return DdlMySql()
+        return DdlMySql(strDbms)
     elif strDbms.startswith('firebird'):
-        return DdlFirebird()
+        return DdlFirebird(strDbms)
     elif strDbms.startswith('oracle'):
         return DdlOracle(strDbms)
     else:

@@ -20,9 +20,9 @@ class DownloadSchema:
     def __init__(self, downloader, options):
         self.db = downloader
         self.options = options
-        dbms='oracle'
-        self.ddlInterface = createDdlInterface(dbms)
-        self.dmlInterface = createDmlInterface(dbms)
+#        dbms='oracle'
+        self.ddlInterface = createDdlInterface(self.options['toschema'])
+        self.dmlInterface = createDmlInterface(self.options['toschema'])
         
     def downloadSchema(self, of = sys.stdout):
         if self.options['getall'] == True or (self.options['tables'] and (len(self.options['tables']) > 0)):
@@ -170,6 +170,10 @@ def parseCommandLine():
     parser.add_option("-v", "--views",
         dest="strViews", metavar="VIEWS", default=None,
         help="Comma separated list of views")
+
+    parser.add_option("", "--toschema",
+        dest="toSchema", metavar="TOSCHEMA", default="oracle",
+        help="Output schema for SQL - mysql/oracle/postgresql")
     (options, args) = parser.parse_args()
     
     info = {
@@ -191,6 +195,7 @@ def parseCommandLine():
         views = None
 
     runOptions = {
+        'toschema'     : options.toSchema,
         'getall'       : options.bGetAll,
         'gettables'    : True if ((tables and len(tables) > 0)) else False,
         'getviews'     : True if ((views and len(views) > 0)) else False,
