@@ -6,6 +6,21 @@ from DdlCommonInterface import DdlCommonInterface
 from DmlCommonInterface import DmlCommonInterface
 import re
 
+
+mapping_to_standard = {
+    'NUMBER':'NUMBER',
+    'RAW':'RAW',
+    'BLOB':'BLOB',
+    'CHAR':'CHAR',
+    'DATE':'DATE',
+    'FLOAT':'FLOAT',
+    'VARCHAR2':'VARCHAR2',
+    'FLOAT':'FLOAT',
+    'CLOB':'CLOB',
+}
+
+mapping_to_local = dict((v,k) for k, v in mapping_to_standard.iteritems())
+
 class OracleDownloader(DownloadCommon):
     def __init__(self):
         self.strDbms = 'oracle'
@@ -30,6 +45,9 @@ class OracleDownloader(DownloadCommon):
         self.conn = con
         self.version = version
         self.cursor = self.conn.cursor()
+
+    def type_to_standard(self, type):
+        return mapping_to_standard[type]
         
     def getTables(self, tableList):
         """ Returns the list of tables as a array of strings """
@@ -406,6 +424,8 @@ class DdlOracle(DdlCommonInterface):
         for strDdl in self.params['create_function']:
             diffs.append(('Add function',  strDdl % info))
     
+    def type_to_local(self, type):
+        return mapping_to_local[type]
 
         
 class DmlOracle(DmlCommonInterface):

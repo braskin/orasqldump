@@ -392,7 +392,7 @@ class DdlCommonInterface:
             # MySQL silently sets the default to CURRENT_TIMESTAMP
             strRet += ' DEFAULT null'
 
-        strType = col.get('type', None)
+        strType = self.type_to_local(col.get('type', None))
         strSize = col.get('size', None)
         strPrec = col.get('precision', None)
         

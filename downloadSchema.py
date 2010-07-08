@@ -8,6 +8,7 @@ from xml.dom.minidom import parse, parseString
 from OracleInterface import OracleDownloader
 from ddlInterface import createDdlInterface, attribsToDict
 from dmlInterface import createDmlInterface
+from DdlCommonInterface import g_dbTypes
 
 
 __author__ = "Scott Kirkwood (scott_kirkwood at berlios.com)"
@@ -20,7 +21,6 @@ class DownloadSchema:
     def __init__(self, downloader, options):
         self.db = downloader
         self.options = options
-#        dbms='oracle'
         self.ddlInterface = createDdlInterface(self.options['toschema'])
         self.dmlInterface = createDmlInterface(self.options['toschema'])
         
@@ -71,10 +71,11 @@ class DownloadSchema:
             for colRow in self.db.getTableColumns(strTableName):
                 (strColumnName, type, attlen, precision, attnotnull, default, bAutoIncrement) = colRow
                 strComment = self.db.getColumnComment(strTableName, strColumnName)
+
                 curCol = dict( 
                   [
                     ('name', str(strColumnName)),
-                    ('type', str(type)),
+                    ('type', self.db.type_to_standard(str(type))),
                     ('size', attlen) if attlen else ('',''),
                     ('precision', precision) if precision else ('',''),
                     ('default', default) if default else ('',''),
@@ -204,7 +205,7 @@ def parseCommandLine():
         'tables'       : tables,
         'views'        : views,
     }
-    if info['dbname'] == None or info['user'] == None:
+    if info['dbname'] == None or info['user'] == None or options.toSchema not in g_dbTypes:
         parser.print_help()
         sys.exit(-1)
         

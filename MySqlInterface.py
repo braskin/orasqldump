@@ -5,6 +5,53 @@ from DdlCommonInterface import DdlCommonInterface
 from DmlCommonInterface import DmlCommonInterface
 import re
 
+
+mapping_to_standard = {
+    'INT':'NUMBER',
+    'INTEGER':'NUMBER',
+    'MEDIUMINT':'NUMBER',
+    'SMALLINT':'NUMBER',
+    'TINYINT':'NUMBER',
+    'YEAR':'NUMBER',
+    'NUMERIC':'NUMBER',
+    'BIGINT':'NUMBER',
+    'BIT':'RAW',
+    'RAW':'RAW',
+    'BLOB':'BLOB',
+    'LONGTEXT':'CLOB',
+    'MEDIUMBLOB':'BLOB',
+    'LONGBLOB':'BLOB',
+    'CHAR':'CHAR',
+    'DATE':'DATE',
+    'TIME':'DATE',
+    'TIMESTAMP':'DATE',
+    'DATETIME':'DATE',
+    'DECIMAL':'FLOAT',
+    'DOUBLE':'FLOAT',
+    'DOUBLE PRECISION':'FLOAT',
+    'REAL':'FLOAT',
+    'FLOAT':'FLOAT',
+    'ENUM':'VARCHAR2',
+    'TEXT':'VARCHAR2',
+    'TINYTEXT':'VARCHAR2',
+    'VARCHAR':'VARCHAR2',
+    'MEDIUMTEXT':'CLOB',
+    'FLOAT':'FLOAT',
+    'SET':'VARCHAR2',
+    'TINYBLOB':'RAW',
+    'CLOB':'CLOB',
+}
+
+mapping_to_local = {
+    'NUMBER':'BIGINT',
+    'VARCHAR2':'TEXT',
+    'RAW':'RAW',
+    'BLOB':'BLOB',
+    'CLOB':'CLOB',
+    'FLOAT':'FLOAT',
+    'DATE':'DATE',
+}
+
 class MySqlDownloader(DownloadCommon):
     def __init__(self):
         self.strDbms = 'mysql'
@@ -25,7 +72,10 @@ class MySqlDownloader(DownloadCommon):
         self.conn = conn
         self.version = version
         self.cursor = self.conn.cursor()
-        
+
+    def type_to_standard(self, type):
+        return mapping_to_standard[type]
+
     def getTables(self, tableList):
         """ Returns the list of tables as a array of strings """
         
@@ -328,6 +378,9 @@ class DdlMySql(DdlCommonInterface):
             'DROP FUNCTION %(functionname)s' % info)
         )
 
+    def type_to_local(self, type):
+        return mapping_to_local[type]
+        
 class DmlMySql(DmlCommonInterface):
     def __init__(self, strDbms):
         DmlCommonInterface.__init__(self, strDbms)
@@ -399,7 +452,8 @@ class insertDataIter():
         return('\''+str(iInt)+'\'')
 
     def formatDate(self, dDate):
-        return("to_date('%s','yyyy-mm-dd hh24:mi:ss')" % dDate)
+        date_str = 'str_to_date(\''+str(dDate)+'\',\'%Y-%m-%d %k:%i:%s\')'
+        return date_str
 
     def formatString(self, strString):
         return('\''+strString+'\'')
